@@ -24,7 +24,7 @@ class GridHandler:
         self.remote_files = config.get("remote_files", None)
         self.remote_files_glob = config.get("remote_files_glob", None)
         self.num_workers = config.get("num_workers", 16)
-        self.keep_depth = config.get("keep_depth", None)
+        self.keep_depth = config.get("keep_depth", 5)
         self.alien_args = config.get(
             "alien_xrd_args", ["-timeout", "600", "-retry", "3"]
         )
