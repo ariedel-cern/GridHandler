@@ -16,6 +16,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# per work grid connection
+_worker_grid_connection = None  # process-local TGrid connection
+
 
 class GridHandler:
     def __init__(self, config: dict):
@@ -95,11 +98,18 @@ class GridHandler:
             return None
 
     def _download_tgrid(self, remote_file, local_file):
-        ROOT.gROOT.ProcessLine('TGrid::Connect("alien://")')
-        grid = ROOT.gGrid
-        if not grid or not grid.IsConnected():
-            logger.error(f"❌ [Worker {current_process().pid}] TGrid connection failed")
-            return None
+        global _worker_grid_connection
+
+        if _worker_grid_connection is None:
+            ROOT.gROOT.ProcessLine('TGrid::Connect("alien://")')
+            _worker_grid_connection = ROOT.gGrid
+            if not _worker_grid_connection or not _worker_grid_connection.IsConnected():
+                logger.error(
+                    f"❌ [Worker {current_process().pid}] TGrid connection failed"
+                )
+                return None
+
+        grid = _worker_grid_connection
 
         src = (
             f"alien://{remote_file}"
