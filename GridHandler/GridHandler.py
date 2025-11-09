@@ -42,12 +42,14 @@ class GridHandler:
         parts = remote_path.strip("/").split("/")
         filename = parts[-1]
 
+        # keep full directory structure relative to last 'keep_depth' dirs if set
         if self.keep_depth is None:
-            return self._auto_unique_path(remote_path, filename)
-
-        directory_parts = parts[:-1]
-        sub_path = "_".join(directory_parts[-self.keep_depth :])
-        return os.path.join(self.output_dir, sub_path, filename)
+            return os.path.join(self.output_dir, *parts)  # preserve full path
+        else:
+            sub_path = os.path.join(
+                *parts[-(self.keep_depth + 1) : -1]
+            )  # last N dirs before filename
+            return os.path.join(self.output_dir, sub_path, filename)
 
     def _auto_unique_path(self, remote_path, filename):
         seen = set()
